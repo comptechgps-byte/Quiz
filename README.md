@@ -30,7 +30,7 @@ The GitHub Pages workflow hosts the quiz, and a Supabase Edge Function stores at
 4. Add these Actions repository secrets:
 	- `SUPABASE_ACCESS_TOKEN`: a Supabase personal access token.
 	- `SUPABASE_PROJECT_REF`: the project reference.
-5. In GitHub, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**.
+5. In GitHub, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**. This one-time setting must be enabled manually; GitHub does not allow this workflow token to create the Pages site.
 6. Push to `main`. The Pages workflow deploys the site and the Supabase workflow deploys the score function. The hosted URL is `https://comptechgps-byte.github.io/Quiz/`.
 
 Submitted scores are visible in the Supabase dashboard; public users have no database read policy. The quiz currently calculates marks in the browser, so the function validates and stores submitted scores but cannot prove they reflect honest answers. Do not use this setup as a high-stakes or tamper-resistant exam without moving exam selection and grading to trusted server-side code.
