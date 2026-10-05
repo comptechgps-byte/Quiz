@@ -176,6 +176,10 @@
     state.attempts.push(state.latestAttempt);
     renderResult(reason);
     storageWarning.hidden = false;
+    if (window.location.hostname.endsWith(".github.io") && !hostedConfig.submitUrl) {
+      storageWarning.textContent = "Shared score storage is not configured yet. Download this result to keep a copy.";
+      return;
+    }
     storageWarning.textContent = hostedConfig.submitUrl ? "Saving score to the shared gradebook..." : "Saving score to quiz-scores.csv...";
     const headers = { "Content-Type": "application/json" };
     if (hostedConfig.anonKey) headers.apikey = hostedConfig.anonKey;

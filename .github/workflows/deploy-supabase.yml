@@ -19,11 +19,21 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - name: Deploy edge function
+      - name: Check Supabase configuration
+        id: config
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          test -n "$SUPABASE_ACCESS_TOKEN" || (echo "Set the SUPABASE_ACCESS_TOKEN repository secret." && exit 1)
-          test -n "$SUPABASE_PROJECT_REF" || (echo "Set the SUPABASE_PROJECT_REF repository secret." && exit 1)
-          supabase functions deploy submit-attempt --project-ref "$SUPABASE_PROJECT_REF" --use-api
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$SUPABASE_PROJECT_REF" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Set SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF to deploy the shared score function."
+          fi
+      - name: Deploy edge function
+        if: steps.config.outputs.configured == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: supabase functions deploy submit-attempt --project-ref "$SUPABASE_PROJECT_REF" --use-api

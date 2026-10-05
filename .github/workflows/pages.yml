@@ -23,13 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Build static site
         env:
           SUPABASE_FUNCTION_URL: ${{ vars.SUPABASE_FUNCTION_URL }}
           SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
         run: |
-          test -n "$SUPABASE_FUNCTION_URL" || (echo "Set the SUPABASE_FUNCTION_URL repository variable." && exit 1)
-          test -n "$SUPABASE_ANON_KEY" || (echo "Set the SUPABASE_ANON_KEY repository variable." && exit 1)
+          if [ -z "$SUPABASE_FUNCTION_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::warning::Shared score storage is not configured. The quiz will deploy, but scores will not be shared until both Supabase repository variables are set."
+          fi
           mkdir dist
           cp index.html app.js questions.js styles.css dist/
           node -e 'require("node:fs").writeFileSync("dist/quiz-config.js", "window.QUIZ_CONFIG = " + JSON.stringify({submitUrl: process.env.SUPABASE_FUNCTION_URL, anonKey: process.env.SUPABASE_ANON_KEY}) + ";\n")'
