@@ -13,7 +13,7 @@
       <span class="brand-mark" aria-hidden="true">DB</span>
       <span><strong>DBMS Quiz</strong><small>Course 313302 · Semester 3</small></span>
     </a>
-    <span class="header-label">Browser-based assessment</span>
+    <span class="header-label">Local assessment</span>
   </header>
 
   <main id="app" class="main-content">
@@ -38,7 +38,7 @@
       <div class="notice"><strong>Important:</strong> Your exam will be submitted immediately if you switch tabs or leave this browser window. Keep this page active until submission.</div>
       <details class="privacy-note">
         <summary>How exam monitoring and results work</summary>
-        <p>This browser-only app detects when its tab becomes hidden or its window loses focus. Browser security does not allow it to reliably detect every operating-system screen switch or prevent a determined user from bypassing client-side checks. Attempts and scores are stored in this browser only; export the CSV regularly and keep it on a trusted device.</p>
+        <p>The quiz detects when its tab becomes hidden or its window loses focus. Browser security does not allow it to reliably detect every operating-system screen switch or prevent a determined user from bypassing client-side checks. Submitted scores are appended to quiz-scores.csv in the project folder when the local server is running.</p>
       </details>
     </section>
 
@@ -67,7 +67,7 @@
         <button id="download-results-button" class="button button-primary" type="button">Download results for Excel (.csv)</button>
       </div>
       <section class="record-section">
-        <div class="record-heading"><div><h2>Saved attempts</h2><p>Results saved in this browser</p></div><button id="export-all-button" class="button button-small button-secondary" type="button">Export all</button></div>
+        <div class="record-heading"><div><h2>This session</h2><p>Project CSV: quiz-scores.csv</p></div><button id="export-all-button" class="button button-small button-secondary" type="button">Export session</button></div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Enrolment number</th><th>Name</th><th>Score</th><th>Submitted</th></tr></thead>
@@ -84,6 +84,7 @@
   </main>
   <footer class="site-footer">Based on the DATABASE MANAGEMENT SYSTEM syllabus · MSBTE K Scheme · Course 313302</footer>
   <script src="questions.js"></script>
+  <script src="quiz-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

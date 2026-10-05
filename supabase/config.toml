@@ -1,0 +1,4 @@
+project_id = "dbms-quiz"
+
+[functions.submit-attempt]
+verify_jwt = false

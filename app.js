@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "dbmsQuizAttemptsV1";
   const EXAM_SECONDS = 5 * 60;
   const REQUIRED_COUNTS = { Simple: 4, Intermediate: 3, Complex: 3 };
+  const hostedConfig = window.QUIZ_CONFIG || {};
   const screens = {
     welcome: document.getElementById("welcome-screen"),
     exam: document.getElementById("exam-screen"),
@@ -19,8 +19,7 @@
     deadline: 0,
     timerId: null,
     latestAttempt: null,
-    attempts: [],
-    storageAvailable: true
+    attempts: []
   };
 
   const form = document.getElementById("candidate-form");
@@ -175,18 +174,23 @@
       submissionReason: reason
     };
     state.attempts.push(state.latestAttempt);
-
-    if (state.storageAvailable) {
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.attempts));
-      } catch (error) {
-        state.storageAvailable = false;
-        storageWarning.textContent = "This browser could not save attempts on this device (" + error.message + "). Download the CSV now to keep this result.";
-      }
-    } else if (!storageWarning.textContent) {
-      storageWarning.textContent = "Saved attempts could not be read from this browser. Download the CSV now to keep this result.";
-    }
     renderResult(reason);
+    storageWarning.hidden = false;
+    storageWarning.textContent = hostedConfig.submitUrl ? "Saving score to the shared gradebook..." : "Saving score to quiz-scores.csv...";
+    const headers = { "Content-Type": "application/json" };
+    if (hostedConfig.anonKey) headers.apikey = hostedConfig.anonKey;
+    fetch(hostedConfig.submitUrl || "/api/attempts", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(state.latestAttempt)
+    }).then(function (response) {
+      if (!response.ok) throw new Error("The local server could not save this score.");
+      storageWarning.textContent = hostedConfig.submitUrl ? "Score saved to the shared gradebook." : "Score saved to quiz-scores.csv in the project folder.";
+    }).catch(function () {
+      storageWarning.textContent = hostedConfig.submitUrl
+        ? "Could not save to the shared gradebook. Download this result to keep a copy."
+        : "Could not save to the project CSV. Keep this result with the CSV download below.";
+    });
   }
 
   function renderResult(reason) {
@@ -195,29 +199,9 @@
     document.getElementById("score-value").textContent = state.latestAttempt.score + " / " + state.latestAttempt.maxMarks;
     document.getElementById("percentage-value").textContent = state.latestAttempt.percentage + "%";
     document.getElementById("result-reason").textContent = "Submission reason: " + reason + ". Enrolment number: " + state.candidate.enrollmentNumber + ".";
-    storageWarning.hidden = state.storageAvailable;
     renderRecords();
     renderReview();
     showScreen("result");
-  }
-
-  function loadAttempts() {
-    try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved === null) {
-        state.storageAvailable = true;
-        return [];
-      }
-      const parsed = JSON.parse(saved);
-      if (!Array.isArray(parsed)) throw new Error("Saved attempt data is not a list.");
-      state.storageAvailable = true;
-      return parsed;
-    } catch (error) {
-      state.storageAvailable = false;
-      storageWarning.textContent = "Saved attempts could not be read from this browser (" + error.message + "). You can still download the current result.";
-      storageWarning.hidden = false;
-      return [];
-    }
   }
 
   function renderRecords() {
@@ -308,7 +292,6 @@
       return;
     }
     formError.hidden = true;
-    state.attempts = loadAttempts();
     startExam({ enrollmentNumber: enrollmentNumber, name: name });
   });
 

@@ -1,0 +1,29 @@
+name: Deploy score function
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/deploy-supabase.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy edge function
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN" || (echo "Set the SUPABASE_ACCESS_TOKEN repository secret." && exit 1)
+          test -n "$SUPABASE_PROJECT_REF" || (echo "Set the SUPABASE_PROJECT_REF repository secret." && exit 1)
+          supabase functions deploy submit-attempt --project-ref "$SUPABASE_PROJECT_REF" --use-api
